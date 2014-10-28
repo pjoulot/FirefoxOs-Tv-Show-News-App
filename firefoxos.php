@@ -1,3 +1,155 @@
+<?php
+
+	session_start();
+	mysql_connect("localhost", "root", "");
+	mysql_select_db("stargatearrow");
+
+// Fonction pour sécuriser toutes les entrées en base de données
+	function secur($secur) {
+		return mysql_real_escape_string($secur);
+	}
+
+// Fonction pour sécuriser les données sorties de la base de données
+	function sortie($sortie) {
+		return stripslashes(htmlspecialchars($sortie));
+	}
+	
+// Fonction pour faire les requêtes SQLs (en même temps ça compte le nb de requêtes/page)
+	$nbQuery = 0;
+	function query($query) {
+		global $nbQuery;
+		$nbQuery++;
+	return mysql_query($query);
+	}
+
+// Fonction assoc (qui sert juste à écrire mysql_fetch_assoc() plus vite)
+	function assoc($assoc) {
+		return mysql_fetch_assoc($assoc);
+	}
+	
+// Fonction BBcode : fonction qui sera utilisée pour mettre en forme les textes envoyés par les mbr
+function BBcode($content) {
+	// Parsage des balises
+$BBcode = array(  
+		'`\[gras\](.+)\[/gras\]`isU',
+		'`\[italique\](.+)\[/italique\]`isU',
+		'`\[souligner\](.+)\[/souligner\]`isU',
+		'`\[barrer\](.+)\[/barrer\]`isU',
+		'`\[citation auteur=&quot;(.+)&quot;\](.+)\[/citation\]`isU',
+		'`\[citation\](.+)\[/citation\]`isU',
+		'`\[image nom=&quot;(.+)&quot;\](.+)\[/image\]`isU',
+		'`\[icone nom=&quot;(.+)&quot;\](.+)\[/icone\]`isU',
+		'`\[lien\](.+)\[/lien\]`isU',
+		'`\[lien url=&quot;(.+)&quot;\](.+)\[/lien\]`isU',
+		'`\[email\](.+)\[/email\]`isU',
+		'`\[email adresse=&quot;(.+)&quot;\](.+)\[/email\]`isU',
+		'`\[position valeur=&quot;(.+)&quot;\](.+)\[/position\]`isU',
+		'`\[taille valeur=&quot;(.+)&quot;\](.+)\[/taille\]`isU',
+		'`\[flottant valeur=&quot;(.+)&quot;\](.+)\[/flottant\]`isU',
+		'`\[couleur valeur=&quot;(.+)&quot;\](.+)\[/couleur\]`isU',
+		'`\[police valeur=&quot;(.+)&quot;\](.+)\[/police\]`isU',
+		'`\[exposant\](.+)\[/exposant\]`isU',
+		'`\[indice\](.+)\[/indice\]`isU',
+		'`\[youtube\](.+)\[/youtube\]`isU',
+		'`\[titre1\](.+)\[/titre1\]`isU',
+		'`\[titre2\](.+)\[/titre2\]`isU',
+	);  
+	
+	$html = array(  
+		'<span class="gras">$1</span>',
+		'<span class="italique">$1</span>',
+		'<span class="souligner">$1</span>',
+		'<span class="barrer">$1</span>',
+		'<div class="citation"><span class="gras">Citation de $1 :</span><br />$2</div>',
+		'<div class="citation"><span class="gras">Citation :</span><br />$1</div>',
+		'<img src="../$2" alt="$1" />',
+		'<a href="$2"><img src="$2" alt="$1" width="100px" height="80px"  /></a>',
+		'<a href="$1" rel="nofollow">$1</a>',
+		'<a href="$1" rel="nofollow">$2</a>',
+		'<a href="mailto: $1">$1</a>',
+		'<a href="mailto: $1">$2</a>',
+		'<div class="$1">$2</div>',
+		'<span class="$1">$2</span>',
+		'<div class="flottant$1">$2</div>',
+		'<span class="$1">$2</span>',
+		'<span class="$1">$2</span>',
+		'<sup>$1</sup>',
+		'<sub>$1</sub>',
+		'<iframe width="560" height="315" src="$1" frameborder="0" allowfullscreen></iframe>',
+		'<h2>$1</h2>',
+		'<h3>$1</h3>',
+	); 
+	
+	$content = preg_replace($BBcode, $html, $content);
+	
+	// parsage des smilies
+	$smiliesName = array('o_O', '\^\^', ':colere:', ':euh:', ':D', ':p', '-_-', ':\'', ':rire:', ':hum:', ';\)', ':\)', ':\(', 'x_x');
+	$smiliesUrl  = array('blink.png', 'ciel.png', 'colere.png', 'heu.png', 'heureux.png', 'langue.png', 'oups.png', 'pleure.png', 'rire.png', 'hum.png', 'clin.png', 'smile.png', 'triste.png', 'x_x.png');
+	$smiliesPath = "Templates/Images/Smilies/";
+	
+	for ($i = 0, $c = count($smiliesName); $i < $c; $i++) {
+		$content = preg_replace('`' . $smiliesName[$i] . '`isU', '<img src="' . $smiliesPath . $smiliesUrl[$i] . '" alt="smiley" />', $content);
+	}
+
+	// Rtours à la ligne
+	$content = preg_replace('`\n`isU', '<br />', $content); 
+
+	return $content;
+}
+
+$infos1 = query('SELECT * FROM news, categories_news WHERE catNews_id = news_cat ORDER BY news_date DESC LIMIT 0,10');
+$sectionsNews = "";
+$listeNews = "";
+$javascriptNews = "";
+$numero = 1;
+
+while($infos = assoc($infos1)) {
+
+  $titreNews = sortie($infos['news_nom']);
+  $contenuNews = BBcode(sortie($infos['news_contenu']));
+  $imageNews = sortie($infos['news_image']);
+  $imageNews = preg_replace('`' .'Templates/Images/news' . '`', 'images', $imageNews);
+  $catNews = sortie($infos['catNews_nom']);
+
+  $sectionsNews .= '<section role="region" id="news'.$numero.'" data-position="right">';
+  $sectionsNews .= '<header class="fixed">';
+  $sectionsNews .= '<a id="btn-news'.$numero.'-back" href="#"><span class="icon icon-back">back</span></a>';
+  $sectionsNews .= '<h1>'.$titreNews.'</h1>';
+  $sectionsNews .= '</header>';
+  $sectionsNews .= '<article class="content scrollable header">';
+  $sectionsNews .= '<div class="lectureNews">';
+  $sectionsNews .= '<h1>'.$titreNews.'</h1>';
+  $sectionsNews .= 	$contenuNews;
+  $sectionsNews .= '</div>';
+  $sectionsNews .= '</article>';
+  $sectionsNews .= '</section>';
+  
+  $listeNews .= '<li>';
+  $listeNews .= '<aside class="pack-end">';
+  $listeNews .= '<img alt="photo" src="'.$imageNews.'">';
+  $listeNews .= '</aside>';
+  $listeNews .= '<a id="btn-news'.$numero.'" href="#">';
+  $listeNews .= '<p class="listeNewsTitle">'.$titreNews.'</p>';
+  $listeNews .= '<p>'.$catNews.'</p>';
+  $listeNews .= '</a>';
+  $listeNews .= '</li>';
+  
+  $javascriptNews .= "document.querySelector('#btn-news".$numero."').addEventListener ('click', function () {
+  document.querySelector('#news".$numero."').className = 'current';
+  document.querySelector('[data-position=\"current\"]').className = 'left';
+});
+document.querySelector('#btn-news".$numero."-back').addEventListener ('click', function () {
+  document.querySelector('#news".$numero."').className = 'right';
+  document.querySelector('[data-position=\"current\"]').className = 'current';
+});";
+  
+  $numero ++;
+}
+
+?>
+
+
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -259,120 +411,22 @@
                 <p style="">Visitez Green Arrow France</p>
               </a>
             </li>
-			<li>
-			  <aside class="pack-end">
-                <img alt="photo" src="http://www.green-arrow-france.fr/Templates/Images/news/serietv.png">
-              </aside>
-              <a id="btn-lists" href="#">
-                <p class="listeNewsTitle">Déclaration de Marc Guggenheim au sujet de The Calm</p>
-				<p>Série TV</p>
-              </a>
-            </li>
-            <li>
-			  <aside class="pack-end">
-                <img alt="photo" src="http://www.green-arrow-france.fr/Templates/Images/news/episodes.png">
-              </aside>
-              <a id="btn-progress" href="#">
-                <p class="listeNewsTitle">Corto Maltese a son synopsis officiel</p>
-				<p style="font-size: 1.2rem;">Episodes</p>
-              </a>
-            </li>
+			<?php echo $listeNews; ?>
           </ul>
         </div>
       </article>
     </section> <!-- end drawer -->
   </section> <!-- end index -->
-
-  <!--·························· Action menu ··························-->
-  <section id="action-menu" data-position="back" class="fullscreen">
-    <form role="dialog" data-type="action">
-      <header> Title </header> <!-- this header is optional -->
-      <menu>
-        <button> Action 1 </button>
-        <button disabled> Action 2 (disabled) </button>
-        <button> Action 3 </button>
-        <button> Cancel </button>
-      </menu>
-    </form>
-  </section>
   
-  <section role="region" id="lists" data-position="right">
-    <header class="fixed">
-      <a id="btn-lists-back" href="#"><span class="icon icon-back">back</span></a>
-      <h1>Déclaration de Marc Guggenheim au sujet de The Calm</h1>
-    </header>
-    <article class="content scrollable header">
-		
-		<div class="lectureNews">
-		<h1>Déclaration de Marc Guggenheim au sujet de The Calm</h1>
-	
-      <div class="centrer"><img src="http://www.green-arrow-france.fr/Templates/Images/news/AR214b_0408b.jpg-3fb4f161-t3-300x199.jpg" alt="caity"></div>
-<br>
-<br>Vous devez tous être dans le même état que nous, c'est-à-dire atterrés par la mort de Sara, survenue dans l'épisode <span class="souligner"><span class="gras">The Calm</span></span>, tout début de la saison trois des aventures de notre archer préféré! Cette mort semble permanente et notre Canary bien aimé est décédé pour de bon cette fois-ci <img src="Templates/Images/Smilies/pleure.png" alt="smiley">
-<br>
-<br>
-<br><div class="flottantGauche"><img src="http://www.green-arrow-france.fr/Templates/Images/news/thumb_02.jpg" alt="c"></div>Lors d'un Q&amp;A avec l'équipe du site <a href="http://www.greenarrowtv.com/arrow-shocker-ep-marc-guggenheim-on-why-it-happened/19145">Greenarrowtv</a>, Marc Guggenheim a tenu à expliquer le pourquoi du comment et la difficulté de cette décision!
-<br>
-<br>"Chaque année, il est décidé ce que nous passerons sous silence à travers un hiatus et ce que nous devons étaler sur l'intrigue de l'année. Le schéma de la première saison, nous l'avons repris dans la saison 2 et nous réitérons avec cette saison 3. Nous avons à peine discuter du thème général de cette saison 3, ainsi que du destin d'Oliver et de tous les personnages au cours de ce long voyage. Tout au long de ces conversations scénaristiques, il nous est venu l'idée de commencer cette saison de la manière où nous en achevons une généralement. C'est une des premières idées qui a fusé autour de la table.
-<br>
-<br><div class="flottantDroite"><img src="http://www.green-arrow-france.fr/Templates/Images/news/ustv-arrow-s02e19-man-under-the-hood-still-03.jpg" alt="gf"></div>'Rester proche de vos ennemis', ça a été dur! Il nous est à chaque fois de plus en plus dur de tuer un personnage. Nous ne sommes ni <span class="souligner"><span class="gras">Game of Thrones</span></span> ni <span class="gras"><span class="souligner">Sons of Anarchy</span></span>. C'est vraiment dur, je le pense vraiment. Notre cast et nos guests sont toujours des gens merveilleux. Nous avons été très chanceux. Nous ne filtrons pas les gens par leur personnalité mais nous avons désormais ce grand groupe et un casting merveilleusement accueillant avec <span class="gras">Caity Lotz</span> bien en place dans cette superbe famille. Il est donc très difficile de tuer quelqu'un avec qui on a plaisir à travailler, pour qui on a plaisir à écrire des scripts et qu'on a plaisir à voir jouer ses scènes. Mais comme avec les morts de Tommy et Moira, les implications vont très loin dans l'histoire et affectent tous les personnages. Nous appelons cela la "terrible loi des mathématiques". Un mystère commence la saison et nous entraînera pendant une bonne première moitié de l'année. Cela entraîne tous les projets que nous avions pour les caractères d'Oliver, de Felicity et de Laurel. Cela sera dur et difficile à créer mais c'est le moteur qui nous conduira lors de cette saison 3.
-<br>
-<br><div class="centrer"><img src="http://www.green-arrow-france.fr/Templates/Images/news/sara laurel.jpg" alt="sara laurel"></div>
-<br>
-<br>La mort de Sara va très certainement affecter la manière dont Laurel et Oliver interagissent et probablement pas de la façon que l'on serait en droit d'attendre. La mort de Sara les rapproche plus que ça ne les déchire. Cela ne signifie pas qu'il n'y aura lus de moments significatifs de conflits entre eux deux. C'est l'une des raisons pour laquelle nous avons tué Sara. L'histoire se densifie et une certaine richesse croît. ainsi au cours de l'épisode 2 il y aura une certaine scène où les deux amis sont proches et ne peuvent cependant pas se supporter mutuellement. Plus tard, une autre scène interviendra où ils seront plus proches qu'ils ne l'ont jamais été. Ce n'est ni schizophrénique, ni incompréhensible. Chaque instant sera intense du fait de ces montagnes russes émotionnelles. La mort de Sara changera les choses pour tout le monde dans cette saison! Pensez également à Quentin! Pourra-t-il gérer la perte de sa fille une seconde fois?
-<br>
-<br>N'allez surtout pas penser que la mort de Sara sonne le glas d'Olicity! Cette scène à l'hôpital ne les remettra pas en boîte à tout jamais. Les répercussions de cette scène dans l'épisode et dans la saison 3 seront immenses! Nous ne mettrons pas leur relation en standby ou la réinitialiser. C'est juste une évolution dans leur relation continue. Je vous le promets! 
-<br>
-<br>Je vous promets également que les rumeurs de nouvelles apparitions de Caity au cours de la saison sont véridiques, elle a bien signé un contrat et vous allez la oir au moins dans les épisodes 2 et 3 sinon plus. Nous avons de magnifiques scénarii impliquant Caity et nous faisons quelques choses de vraiment brillant dans cette série: les flashbacks! Nous avons toujours voulu raconter l'histoire de Caity après Lian Tu, sa rencontre avec Nyssa, ... Son contrat pour cette saison implique trois épisodes mais ce ne sera certainement pas la fin! Sa mort ramènera Nyssa à Starling City car K<span class="gras">atrina Law reviendra pour l'épisode 4</span>!"
-<br>
-<br>
-<br>
-<br>
-<br>(source: Greenarrowtv.com)<p></p></div>
-					
-					
-					
-		</div>		
-    </article>
-  </section>
-  
-  <section role="region" id="progress" data-position="right">
-    <header class="fixed">
-      <a id="btn-progress-back" href="#"><span class="icon icon-back">back</span></a>
-      <h1>Progress and activity</h1>
-    </header>
-    <article class="content scrollable header">
-      <header><h2>Spinner</h2></header>
-      <div class="center">
-        <progress></progress>
-      </div>
-
-      <header><h2>Activity bar</h2></header>
-      <div>
-        <progress class="pack-activity" value="0" max="100"></progress>
-      </div>
-
-      <header><h2>Progress bar</h2></header>
-      <div>
-        <progress value="80" max="100"></progress>
-      </div>
-
-      <header><h2>Progress + activity bar</h2></header>
-      <div>
-        <progress class="pack-activity" value="80" max="100"></progress>
-      </div>
-
-      <header><h2>Light progress + activity bar</h2></header>
-      <div>
-        <progress class="pack-activity light" value="0" max="100"></progress>
-      </div>
-    </article>
-  </section>
+<?php  echo $sectionsNews; ?>
 
 
   <script type="text/javascript" defer src="js/status.js"></script>
   <script type="text/javascript" defer src="js/seekbars.js"></script>
   <script type="text/javascript" defer src="js/app.js"></script>
+  <script type="text/javascript">
+	<?php echo $javascriptNews; ?>
+  </script>
 
 </body>
 </html>
