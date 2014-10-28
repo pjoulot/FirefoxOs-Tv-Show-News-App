@@ -107,7 +107,9 @@ while($infos = assoc($infos1)) {
 
   $titreNews = sortie($infos['news_nom']);
   $contenuNews = BBcode(sortie($infos['news_contenu']));
+  $contenuNews = preg_replace('`\.\./http`isU', 'http', $contenuNews); 
   $imageNews = sortie($infos['news_image']);
+  //Si les liens étaient en absolu, on corrige
   $imageNews = preg_replace('`' .'Templates/Images/news' . '`', 'images', $imageNews);
   $catNews = sortie($infos['catNews_nom']);
 
@@ -407,7 +409,7 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
         <div data-type="list">
           <ul>
 			<li>
-              <a id="btn-action-menu" href="#">
+              <a id="btn-website" href="#">
                 <p style="">Visitez Green Arrow France</p>
               </a>
             </li>
@@ -423,8 +425,18 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
 
   <script type="text/javascript" defer src="js/status.js"></script>
   <script type="text/javascript" defer src="js/seekbars.js"></script>
-  <script type="text/javascript" defer src="js/app.js"></script>
   <script type="text/javascript">
+    document.querySelector('#btn-website').addEventListener ('click', function () {
+
+	var openURL = new MozActivity({
+    name: "view",
+    data: {
+        type: "url",
+        url: "http://www.green-arrow-france.fr"
+    }
+    });
+	
+	});
 	<?php echo $javascriptNews; ?>
   </script>
 
