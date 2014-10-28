@@ -1,0 +1,40 @@
+.souligner{text-decoration:underline;}
+.barrer{text-decoration:line-through;}
+.italique{font-style:italic;}
+.gras{font-weight:bold;}
+.citation{border:dashed silver 1px;padding:0 3px 3px 3px;}
+.gauche{text-align:left;}
+.centrer{text-align:center;}
+.droite{text-align:right;}
+.ttpetit{font-size:xx-small;}
+.tpetit{font-size:x-small;}
+.petit{font-size:small;}
+.grand{font-size:large;}
+.tgrand{font-size:x-large;}
+.ttgrand{font-size:xx-large;}
+.flottantGauche{float:left;margin:5px;}
+.flottantDroite{float:right;margin:5px;}
+.white{color:white;}
+.silver{color:silver;}
+.gray{color:gray;}
+.black{color:black;}
+.red{color:red;}
+.orange{color:orange;}
+.maroon{color:maroon;}
+.lime{color:lime;}
+.green{color:green;}
+.yellow{color:yellow;}
+.olive{color:olive;}
+.blue{color:blue;}
+.navy{color:navy;}
+.fuchsia{color:fuchsia;}
+.purple{color:purple;}
+.aqua{color:aqua;}
+.teal{color:teal;}
+.arial{font-family:Arial, serif;}
+.georgia{font-family:Georgia, serif;}
+.impact{font-family:Impact, serif;}
+.verdana{font-family:Verdana, serif;}
+.times{font-family:Times, serif;}
+.geneva{font-family:Geneva, serif;}
+.optima{font-family:Optima, serif;}

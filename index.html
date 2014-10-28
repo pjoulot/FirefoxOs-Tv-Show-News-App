@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <title>Building blocks demo</title>
+  <!-- Building blocks -->
+  <link rel="stylesheet" href="style/action_menu.css">
+  <link rel="stylesheet" href="style/buttons.css">
+  <link rel="stylesheet" href="style/headers.css">
+  <link rel="stylesheet" href="style/status.css">
+  <link rel="stylesheet" href="style/switches.css">
+  <link rel="stylesheet" href="style/drawer.css">
+  <link rel="stylesheet" href="style/lists.css">
+  <link rel="stylesheet" href="style/progress_activity.css">
+  <link rel="stylesheet" href="style/scrolling.css">
+  <link rel="stylesheet" href="style/toolbars.css">
+  <link rel="stylesheet" href="style/BBCode.css">
+  <link rel="stylesheet" href="style/styleAddon.css">
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="icons/styles/action_icons.css">
+  <link rel="stylesheet" href="icons/styles/media_icons.css">
+  <link rel="stylesheet" href="icons/styles/comms_icons.css">
+  <link rel="stylesheet" href="icons/styles/settings_icons.css">
+
+  <!-- Transitions -->
+  <link rel="stylesheet" href="transitions.css">
+
+  <!-- Util CSS: some extra tricks -->
+  <link rel="stylesheet" href="util.css">
+
+  <!-- Additional markup to make Building Blocks kind of cross browser -->
+  <!--link rel="stylesheet" href="cross_browser.css"-->
+
+  <style>
+    #index {
+      height: 100%;
+    }
+    [data-position="right"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transform: translateX(100%);
+      -webkit-transform: translateX(100%);
+      z-index: 15;
+      z-index: 100; /* -> drawer */
+    }
+    section[role="region"][data-position="right"] {
+      position: absolute;
+    }
+    [data-position="right"].current {
+      animation: rightToCurrent 0.4s forwards;
+      -webkit-animation: rightToCurrent 0.4s forwards;
+    }
+    [data-position="right"].right {
+      animation: currentToRight 0.4s forwards;
+      -webkit-animation: currentToRight 0.4s forwards;
+    }
+    [data-position="current"].left {
+      animation: currentToLeft 0.4s forwards;
+      -webkit-animation: currentToLeft 0.4s forwards;
+    }
+    [data-position="current"].current {
+      animation: leftToCurrent 0.4s forwards;
+      -webkit-animation: leftToCurrent 0.4s forwards;
+    }
+    [data-position="back"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: -1;
+      opacity: 0;
+      /* z-index: 100; -> drawer */
+    }
+    [data-position="back"].fade-in {
+      z-index: 120;
+      animation: fadeIn 0.2s forwards;
+      -webkit-animation: fadeIn 0.2s forwards;
+    }
+    [data-position="back"].fade-out {
+      animation: fadeOut 0.2s forwards;
+      -webkit-animation: fadeOut 0.2s forwards;
+    }
+
+    [data-position="edit-mode"] {
+      position: absolute;
+      top: -5rem;
+      left: 0;
+      right: 0;
+      bottom: -7rem;
+      z-index: -1;
+      opacity: 0;
+      transition: all 0.3s ease;
+    }
+    [data-position="edit-mode"].edit {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 120;
+      opacity: 1;
+    }
+
+    /* Active state */
+    .active {
+      background-color: #b2f2ff;
+      color: #fff;
+    }
+
+    /* Headers */
+    #headers .content {
+      margin-top: -1.5rem;
+    }
+    #headers section[role="region"] {
+      margin-bottom: 1.5rem;
+    }
+    #headers section[role="region"]:not(#drawer) {
+      display: inline;
+    }
+    #headers article header:first-child {
+      margin-top: 1.5rem;
+    }
+    #headers section[role="region"] header h2 {
+      margin: 0 0 1.5rem 0;
+    }
+
+    /* Lists */
+    /* to avoid double background effect on press */
+    [data-type=list] li>a:active {
+      background-color: transparent;
+    }
+
+    /* Drawer */
+    section[role="region"]:not(#drawer) {
+      transition: none;
+      left: 0;
+      z-index: 0;
+      padding-left: 0;
+    }
+    section[data-type="sidebar"] + section[role="region"] > header:first-child > button,
+    section[data-type="sidebar"] + section[role="region"] > header:first-child > a {
+      background-position: 3.5rem center;
+    }
+
+    /* Switches */
+    #switches div:last-child label:last-child {
+      margin-left: 2rem;
+    }
+    #switches div:last-child {
+      margin-left: 2rem;
+    }
+
+    /* Scrolling */
+    nav[data-type="scrollbar"] {
+      padding-top: 1rem;
+    }
+    nav[data-type="scrollbar"] p {
+      opacity: 1;
+    }
+
+    /* Seek bars */
+    div[role="slider"] > label.icon {
+      background: no-repeat right top;
+      background-size: 3rem auto;
+    }
+
+    /* Tabs */
+    #tabs .content {
+      padding: 0;
+    }
+    #tabs .content .content {
+      padding: 1.5rem 3rem;
+    }
+    #panel1 a {
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAABaCAYAAACv+ebYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDpDM0IyRDEwMTRCQ0ExMUUzOEI3MkZFOEM1MTY1MUU0NSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDpDM0IyRDEwMjRCQ0ExMUUzOEI3MkZFOEM1MTY1MUU0NSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkMzQjJEMEZGNEJDQTExRTM4QjcyRkU4QzUxNjUxRTQ1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOkMzQjJEMTAwNEJDQTExRTM4QjcyRkU4QzUxNjUxRTQ1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+RALCTwAAAgdJREFUeNrsmLFKA0EQhnNeULhOwSIQrAQFraI2FkKsBLGSdIakClj4BNa+gQhWSayUlBYWKQSLYEBtYsRCEAKKYKGgiKQ5Z2ACR7jd7N5NFGQGfoJzs/vlbjdz6+/4vp/4ixhJ/FEIWMACZotkWNJxHO2gQqHgwcc0/fkA+tLVVyoVMzBMrJpjHLSHJSCPcgitgnZBb7HuWBGToAvQbF8ev8A2KAtaAb1yr/F+CDQYeO2Ae3OlQTmDuk2qZQMv454zqHOolg3sWSyJxwluWYBbnOAbUNugrk21bGA8ppRAXU1Nl2p87p9TA7QG6oRc69C1xjAaCMY5aAa0AZqn3C3oFPQdu1cPCATUSEN9OyVp7XC35jV1W3T3JZMbGgSeAjVBh/Roywo4QvEVNEe1TRobCYyt7xKUCeTcEHieoG4gl6Gx6ShrfARKheR78F6U+6C9SNEcqzbgRXrNqSIIdzV1WZrryvRRLxlsOncAVDuXCjzGeLwatQF/MII/bcBPjOBnG/AdI/jeBoxN/4UBinM82jaQOgO4HqVzHTOAT6J0rjPQREzwu/JUKB6IgAUsYAELWMAC/vUIPfoUi0XtoOr6jpWJ6ucWzI4+Tu1aNUckEzUMLCaqzh0QEzVWrZioyh6QEBNVTFQxUcVENXzUYqLGCTFRtWAxUaOGmKjyb6qABfyPwD8CDADIZJaymr3BjwAAAABJRU5ErkJggg==);
+    }
+    #panel2 a {
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAABaCAYAAACv+ebYAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyRpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoTWFjaW50b3NoKSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo5NjZEOTM1MTRCQ0UxMUUzOEI3MkZFOEM1MTY1MUU0NSIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo5NjZEOTM1MjRCQ0UxMUUzOEI3MkZFOEM1MTY1MUU0NSI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjlEMUREOTkyNEJDQjExRTM4QjcyRkU4QzUxNjUxRTQ1IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjk2NkQ5MzUwNEJDRTExRTM4QjcyRkU4QzUxNjUxRTQ1Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+XJ6+IQAAA0pJREFUeNrsmF1IVEEUx+fqwmoRRS9FREUf9lSs9lBERNSjRBB9PAQtGZWla+ZDH/QQ9VAQ9GVqIaH1YFRgRAW99BAUBVFa9BBREhm9FIVGUQm5/Q+eibvj3L0zd3e1jznwY53r7Px35p6Ze+7fS6fTYjSiSIxSOGEn7IT/fuGY53k5DZBMJuP42AjOAeNjMIYv0mcpOAJ2gwFL7RLQCirADlNxudQnwU7QBqIuQTVoMf1+DCwFW7i9AbwF+wL6HwArlWvFivggqDERPqH8yr2gF5zR9C8HC0LGpOU+Ct6ECc/WXD8NPoMO5Xo3mKqZccLXbgwTlcK3wWrNYG08wD3f9YOMP8aDPv67CdSbJldHwP8ou99ZJFczqLPJ6psBAofAa4MxvoMqkFJEPU7aeJDwACeDGg8MZ/oDtGtEW3h/l2Tbx62a2ZVH3M9StDosueRypXjZZdTxfRu0FG5WRO+An0qfG8WJxO+d8BLMAfO5PRF8BA8tRKdpknUymKLQrz6dapU9SOf3XAvhXt7H/ngCHit0x5ROfbyn74IxYCwv/2LwwVC8nnOnltvLaIYmz+MusNmXpXSy3QKTDIXTnB9NUQqBS/y0kkHn831QZilexYlrVYHQeb3f154JHoFtmu9RUi3UiLfzPrcufQ4rx+A4cBY853u4iO/pM942a4wrEIM+NPP3/OtL+VoZX1fjMmgAp/JV7NGAS3i7hI1H1cyxsErEpsrs4sPlokHfBk7QeL7K234uj1aBnpC+68DxfNfV18E8sCvLM/s82FOIgv4b389ZnM1XwSfwFCwHm8CXXLLa5HncyRTx1gutQjzngThhJ+yEnbATdsJO+P8R9tjLjBwXKlORTFRPXKH3sJxMVOlz0TuVM1GzLjV5EhXKdVoynYl6jV9fwmKG+FNNVJpxpxhuogpOshUi00TNllyCfQ8jP9OZqP74N01UeXJRVIpME/WVGLITbU1UEt3ua5OlONxEFWu3ysaImqj+GVNM4F84ndtfxZCr98JCvJETLeuMVWHBp5g0UeWS25ioHh9ANb7JjJiJmhLORLUsfQpmouqSSxfrRaaJGhS0552Jmpfy1pmokU1U06y2eTNxJqoTdsJOuLDxS4ABAHTFDfqZk4Q5AAAAAElFTkSuQmCC);
+    }
+    #panel3 a {
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAABQCAYAAAAOYsW+AAAA30lEQVRo3u2YMQrCQBBFv95ICXqTtDmJKfQk01olED2DiugF1MImjXqBWNisEIZVFIKFvFftzmdnt3kwrAQAAB/S84Usy0aS1q68N7NhyKeSJi6fmVke8p2kgcvHZrZpF/qRx1witesX+e2TnrGLz5IaVzu9WD85ttYHlzWh5/uLzewuqXQHF639SlLd2teh9mTpHl6GnoDHePxbjwt3sPrC48o9vMBjPMZjPAYAAACAjuZqzbfRuVppMgx5dK5WmuQhj87VShPmakeadP7PFXoCHuMxHgMe4zEeA8C/8ABPaein4jLEkQAAAABJRU5ErkJggg==);
+    }
+
+    /* Filters */
+    [role="tablist"][data-type="filter"] {
+      margin-bottom: 2rem;
+    }
+
+    /* Device rotation */
+    .landscape section[role="region"]#drawer > header:first-child {
+      /* Whatever needs to be changed on landscape */
+    }
+  </style>
+</head>
+<body>
+  <section id="index" data-position="current">
+    <section data-type="sidebar">
+      <header>
+        <menu type="toolbar">
+          <a href="#">Retour</a>
+        </menu>
+        <h1>A propos</h1>
+      </header>
+      <article class="content header">
+      <section data-type="list">
+        <header>Développeur</header>
+        <ul>
+          <li>
+            <aside class="pack-end">
+              <img alt="photo" src="images/photo.jpg">
+            </aside>
+            <a href="#">
+              <p style="color: #E7E7E7;">Philippe Joulot</p>
+              <p>02/06/1991 - FRANCE</p>
+            </a>
+          </li>
+        </ul>
+        <header>Green Arrow France</header>
+        <ul>
+		  <li>
+		  <p style="color: #E7E7E7;">Informations</p>
+		  <p>Site sur la série télé Arrow</p>
+		  </li>
+          <li>
+		  <p style="color: #E7E7E7;">URL</p>
+		  <p>www.green-arrow-france.fr</p>
+		  </li>
+		</ul>
+		<header>Remerciements</header>
+		<ul>
+          <li>
+		  <p style="color: #E7E7E7;">Staff du site</p>
+		  </li>
+		  <li>
+		  <p style="color: #E7E7E7;">Mozilla</p>
+		  </li>
+		</ul>
+      </section>
+    </article>
+    </section>
+
+    <section id="drawer" role="region">
+      <header class="fixed">
+        <a href="#"><span class="icon icon-menu">hide sidebar</span></a>
+        <a href="#drawer"><span class="icon icon-menu">show sidebar</span></a>
+        <h1>Green Arrow France</h1>
+      </header>
+      <article class="scrollable header">
+        <div data-type="list">
+          <ul>
+			<li>
+              <a id="btn-action-menu" href="#">
+                <p style="">Visitez Green Arrow France</p>
+              </a>
+            </li>
+			<li>
+			  <aside class="pack-end">
+                <img alt="photo" src="http://www.green-arrow-france.fr/Templates/Images/news/serietv.png">
+              </aside>
+              <a id="btn-lists" href="#">
+                <p class="listeNewsTitle">Déclaration de Marc Guggenheim au sujet de The Calm</p>
+				<p>Série TV</p>
+              </a>
+            </li>
+            <li>
+			  <aside class="pack-end">
+                <img alt="photo" src="http://www.green-arrow-france.fr/Templates/Images/news/episodes.png">
+              </aside>
+              <a id="btn-progress" href="#">
+                <p class="listeNewsTitle">Corto Maltese a son synopsis officiel</p>
+				<p style="font-size: 1.2rem;">Episodes</p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </article>
+    </section> <!-- end drawer -->
+  </section> <!-- end index -->
+
+  <!--·························· Action menu ··························-->
+  <section id="action-menu" data-position="back" class="fullscreen">
+    <form role="dialog" data-type="action">
+      <header> Title </header> <!-- this header is optional -->
+      <menu>
+        <button> Action 1 </button>
+        <button disabled> Action 2 (disabled) </button>
+        <button> Action 3 </button>
+        <button> Cancel </button>
+      </menu>
+    </form>
+  </section>
+  
+  <section role="region" id="lists" data-position="right">
+    <header class="fixed">
+      <a id="btn-lists-back" href="#"><span class="icon icon-back">back</span></a>
+      <h1>Déclaration de Marc Guggenheim au sujet de The Calm</h1>
+    </header>
+    <article class="content scrollable header">
+		
+		<div class="lectureNews">
+		<h1>Déclaration de Marc Guggenheim au sujet de The Calm</h1>
+	
+      <div class="centrer"><img src="http://www.green-arrow-france.fr/Templates/Images/news/AR214b_0408b.jpg-3fb4f161-t3-300x199.jpg" alt="caity"></div>
+<br>
+<br>Vous devez tous être dans le même état que nous, c'est-à-dire atterrés par la mort de Sara, survenue dans l'épisode <span class="souligner"><span class="gras">The Calm</span></span>, tout début de la saison trois des aventures de notre archer préféré! Cette mort semble permanente et notre Canary bien aimé est décédé pour de bon cette fois-ci <img src="Templates/Images/Smilies/pleure.png" alt="smiley">
+<br>
+<br>
+<br><div class="flottantGauche"><img src="http://www.green-arrow-france.fr/Templates/Images/news/thumb_02.jpg" alt="c"></div>Lors d'un Q&amp;A avec l'équipe du site <a href="http://www.greenarrowtv.com/arrow-shocker-ep-marc-guggenheim-on-why-it-happened/19145">Greenarrowtv</a>, Marc Guggenheim a tenu à expliquer le pourquoi du comment et la difficulté de cette décision!
+<br>
+<br>"Chaque année, il est décidé ce que nous passerons sous silence à travers un hiatus et ce que nous devons étaler sur l'intrigue de l'année. Le schéma de la première saison, nous l'avons repris dans la saison 2 et nous réitérons avec cette saison 3. Nous avons à peine discuter du thème général de cette saison 3, ainsi que du destin d'Oliver et de tous les personnages au cours de ce long voyage. Tout au long de ces conversations scénaristiques, il nous est venu l'idée de commencer cette saison de la manière où nous en achevons une généralement. C'est une des premières idées qui a fusé autour de la table.
+<br>
+<br><div class="flottantDroite"><img src="http://www.green-arrow-france.fr/Templates/Images/news/ustv-arrow-s02e19-man-under-the-hood-still-03.jpg" alt="gf"></div>'Rester proche de vos ennemis', ça a été dur! Il nous est à chaque fois de plus en plus dur de tuer un personnage. Nous ne sommes ni <span class="souligner"><span class="gras">Game of Thrones</span></span> ni <span class="gras"><span class="souligner">Sons of Anarchy</span></span>. C'est vraiment dur, je le pense vraiment. Notre cast et nos guests sont toujours des gens merveilleux. Nous avons été très chanceux. Nous ne filtrons pas les gens par leur personnalité mais nous avons désormais ce grand groupe et un casting merveilleusement accueillant avec <span class="gras">Caity Lotz</span> bien en place dans cette superbe famille. Il est donc très difficile de tuer quelqu'un avec qui on a plaisir à travailler, pour qui on a plaisir à écrire des scripts et qu'on a plaisir à voir jouer ses scènes. Mais comme avec les morts de Tommy et Moira, les implications vont très loin dans l'histoire et affectent tous les personnages. Nous appelons cela la "terrible loi des mathématiques". Un mystère commence la saison et nous entraînera pendant une bonne première moitié de l'année. Cela entraîne tous les projets que nous avions pour les caractères d'Oliver, de Felicity et de Laurel. Cela sera dur et difficile à créer mais c'est le moteur qui nous conduira lors de cette saison 3.
+<br>
+<br><div class="centrer"><img src="http://www.green-arrow-france.fr/Templates/Images/news/sara laurel.jpg" alt="sara laurel"></div>
+<br>
+<br>La mort de Sara va très certainement affecter la manière dont Laurel et Oliver interagissent et probablement pas de la façon que l'on serait en droit d'attendre. La mort de Sara les rapproche plus que ça ne les déchire. Cela ne signifie pas qu'il n'y aura lus de moments significatifs de conflits entre eux deux. C'est l'une des raisons pour laquelle nous avons tué Sara. L'histoire se densifie et une certaine richesse croît. ainsi au cours de l'épisode 2 il y aura une certaine scène où les deux amis sont proches et ne peuvent cependant pas se supporter mutuellement. Plus tard, une autre scène interviendra où ils seront plus proches qu'ils ne l'ont jamais été. Ce n'est ni schizophrénique, ni incompréhensible. Chaque instant sera intense du fait de ces montagnes russes émotionnelles. La mort de Sara changera les choses pour tout le monde dans cette saison! Pensez également à Quentin! Pourra-t-il gérer la perte de sa fille une seconde fois?
+<br>
+<br>N'allez surtout pas penser que la mort de Sara sonne le glas d'Olicity! Cette scène à l'hôpital ne les remettra pas en boîte à tout jamais. Les répercussions de cette scène dans l'épisode et dans la saison 3 seront immenses! Nous ne mettrons pas leur relation en standby ou la réinitialiser. C'est juste une évolution dans leur relation continue. Je vous le promets! 
+<br>
+<br>Je vous promets également que les rumeurs de nouvelles apparitions de Caity au cours de la saison sont véridiques, elle a bien signé un contrat et vous allez la oir au moins dans les épisodes 2 et 3 sinon plus. Nous avons de magnifiques scénarii impliquant Caity et nous faisons quelques choses de vraiment brillant dans cette série: les flashbacks! Nous avons toujours voulu raconter l'histoire de Caity après Lian Tu, sa rencontre avec Nyssa, ... Son contrat pour cette saison implique trois épisodes mais ce ne sera certainement pas la fin! Sa mort ramènera Nyssa à Starling City car K<span class="gras">atrina Law reviendra pour l'épisode 4</span>!"
+<br>
+<br>
+<br>
+<br>
+<br>(source: Greenarrowtv.com)<p></p></div>
+					
+					
+					
+		</div>		
+    </article>
+  </section>
+  
+  <section role="region" id="progress" data-position="right">
+    <header class="fixed">
+      <a id="btn-progress-back" href="#"><span class="icon icon-back">back</span></a>
+      <h1>Progress and activity</h1>
+    </header>
+    <article class="content scrollable header">
+      <header><h2>Spinner</h2></header>
+      <div class="center">
+        <progress></progress>
+      </div>
+
+      <header><h2>Activity bar</h2></header>
+      <div>
+        <progress class="pack-activity" value="0" max="100"></progress>
+      </div>
+
+      <header><h2>Progress bar</h2></header>
+      <div>
+        <progress value="80" max="100"></progress>
+      </div>
+
+      <header><h2>Progress + activity bar</h2></header>
+      <div>
+        <progress class="pack-activity" value="80" max="100"></progress>
+      </div>
+
+      <header><h2>Light progress + activity bar</h2></header>
+      <div>
+        <progress class="pack-activity light" value="0" max="100"></progress>
+      </div>
+    </article>
+  </section>
+
+
+  <script type="text/javascript" defer src="js/status.js"></script>
+  <script type="text/javascript" defer src="js/seekbars.js"></script>
+  <script type="text/javascript" defer src="js/app.js"></script>
+
+</body>
+</html>

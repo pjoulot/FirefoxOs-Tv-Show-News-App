@@ -1,0 +1,17 @@
+{
+  "name": "Green Arrow France",
+  "description": "Green Arrow France est une source d'informations sur la série Arrow. Vous resterez informé sur la série où que vous soyez et à chaque instant.",
+  "launch_path": "/index.html",
+  "icons": {
+    "128": "/images/icon-128.png"
+  },
+  "developer": {
+    "name": "Philippe Joulot",
+    "url": "http://www.conquestofsteel.co.uk"
+  },
+  "permissions": {
+    "desktop-notification": {
+      "description": "Pour prévenir lors d'une nouvelle information."
+    }
+  }
+}
