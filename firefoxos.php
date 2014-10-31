@@ -413,7 +413,7 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
           </li>
         </ul>
         <header>Green Arrow France</header>
-        <ul>
+        <ul class="scrollable">
 		  <li>
 		  <p style="color: #E7E7E7;">Informations</p>
 		  <p>Site sur la série télé Arrow</p>
@@ -499,9 +499,10 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
 	
 	});
 	
-	document.querySelector('.lien-navigateur').addEventListener ('click', function () {
+	var classname = document.getElementsByClassName("lien-navigateur");
 
-		if ( isFFOS ) {
+    var openLink = function() {
+        if ( isFFOS ) {
 			var openURL = new MozActivity({
 			name: "view",
 			data: {
@@ -512,8 +513,11 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
 		} else {
 		  window.location.href = this.title
 		}
-	
-	});
+    };
+
+    for(var i=0;i<classname.length;i++){
+        classname[i].addEventListener('click', openLink, false);
+    }
 	<?php echo $javascriptNews; ?>
   </script>
 
