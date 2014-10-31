@@ -177,6 +177,7 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
   
   //Pour ouvrir la news dans le navigateur
   $javascriptNews .= "document.querySelector('#btn-news-lecture".$numero."').addEventListener ('click', function () {";
+  $javascriptNews .= "if ( isFFOS ) {";
   $javascriptNews .= "var openURL = new MozActivity({";
   $javascriptNews .= "  name: \"view\",";
   $javascriptNews .= "  data: {";
@@ -184,6 +185,9 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
   $javascriptNews .= "      url: \"http://www.green-arrow-france.fr/news-501-".$idNews."-".replace($titreNews).".html\"";
   $javascriptNews .= "  }";
   $javascriptNews .= "  });";
+  $javascriptNews .= "} else {";
+  $javascriptNews .= "	  window.location.href = \"http://www.green-arrow-france.fr/news-501-".$idNews."-".replace($titreNews).".html\"";
+  $javascriptNews .= "	}";
   $javascriptNews .= "});";
   
   $numero ++;
@@ -461,39 +465,53 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
   <script type="text/javascript" defer src="js/status.js"></script>
   <script type="text/javascript" defer src="js/seekbars.js"></script>
   <script type="text/javascript">
+    var isFFOS = ("mozApps" in navigator && navigator.userAgent.search("Mobile") != -1);
+  
     document.querySelector('#btn-website').addEventListener ('click', function () {
 
-	var openURL = new MozActivity({
-    name: "view",
-    data: {
-        type: "url",
-        url: "http://www.green-arrow-france.fr"
+	if ( isFFOS ) {
+		var openURL = new MozActivity({
+		name: "view",
+		data: {
+			type: "url",
+			url: "http://www.green-arrow-france.fr"
+		}
+		});
+    } else {
+      window.location.href = "http://www.green-arrow-france.fr"
     }
-    });
 	
 	});
 	
 	document.querySelector('#btn-website-a-propos').addEventListener ('click', function () {
 
-	var openURL = new MozActivity({
-    name: "view",
-    data: {
-        type: "url",
-        url: "http://www.green-arrow-france.fr"
-    }
-    });
+		if ( isFFOS ) {
+			var openURL = new MozActivity({
+			name: "view",
+			data: {
+				type: "url",
+				url: "http://www.green-arrow-france.fr"
+			}
+			});
+		} else {
+		  window.location.href = "http://www.green-arrow-france.fr"
+		}
 	
 	});
 	
 	document.querySelector('.lien-navigateur').addEventListener ('click', function () {
 
-	var openURL = new MozActivity({
-    name: "view",
-    data: {
-        type: "url",
-        url: this.title
-    }
-    });
+		if ( isFFOS ) {
+			var openURL = new MozActivity({
+			name: "view",
+			data: {
+				type: "url",
+				url: this.title
+			}
+			});
+		} else {
+		  window.location.href = this.title
+		}
 	
 	});
 	<?php echo $javascriptNews; ?>
