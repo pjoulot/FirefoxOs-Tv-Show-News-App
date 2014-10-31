@@ -64,8 +64,8 @@ $BBcode = array(
 		'<div class="citation"><span class="gras">Citation :</span><br />$1</div>',
 		'<img src="../$2" alt="$1" />',
 		'<a href="$2"><img src="$2" alt="$1" width="100px" height="80px"  /></a>',
-		'<a href="$1" rel="nofollow">$1</a>',
-		'<a href="$1" rel="nofollow">$2</a>',
+		'<a href="#" class="lien-navigateur" title="$1" >$1</a>',
+		'<a href="#" class="lien-navigateur" title="$1" >$2</a>',
 		'<a href="mailto: $1">$1</a>',
 		'<a href="mailto: $1">$2</a>',
 		'<div class="$1">$2</div>',
@@ -97,6 +97,30 @@ $BBcode = array(
 	return $content;
 }
 
+// Fonction pour remplacer tout ce qui n'est ni chiffre ni lettre par un tiret (fonction pratique pour les URLs)
+	function replace($replace) {
+		$endReplace = str_replace('é', 'e', $replace);
+		$endReplace = str_replace('è', 'e', $endReplace);
+		$endReplace = str_replace('ê', 'e', $endReplace);
+		$endReplace = str_replace('ë', 'e', $endReplace);
+		$endReplace = str_replace('â', 'a', $endReplace);
+		$endReplace = str_replace('ä', 'a', $endReplace);
+		$endReplace = str_replace('à', 'a', $endReplace);
+		$endReplace = str_replace('ï', 'i', $endReplace);
+		$endReplace = str_replace('î', 'i', $endReplace);
+		$endReplace = str_replace('ü', 'u', $endReplace);
+		$endReplace = str_replace('û', 'u', $endReplace);
+		$endReplace = str_replace('ù', 'u', $endReplace);
+		$endReplace = str_replace('Y', 'y', $endReplace);
+		$endReplace = str_replace('ô', 'o', $endReplace);
+		$endReplace = str_replace('ö', 'o', $endReplace);
+		$endReplace = str_replace('ç', 'c', $endReplace);
+		$endReplace = str_replace('?', '', $endReplace);
+		$endReplace = str_replace('!', '', $endReplace);
+		$endReplace = str_replace('...', '', $endReplace);
+	return strtolower(preg_replace('#([^a-z0-9])+#i', '-', $endReplace));
+}
+
 $infos1 = query('SELECT * FROM news, categories_news WHERE catNews_id = news_cat ORDER BY news_date DESC LIMIT 0,10');
 $sectionsNews = "";
 $listeNews = "";
@@ -105,17 +129,23 @@ $numero = 1;
 
 while($infos = assoc($infos1)) {
 
+  $idNews = sortie($infos['news_id']);
   $titreNews = sortie($infos['news_nom']);
   $contenuNews = BBcode(sortie($infos['news_contenu']));
   $contenuNews = preg_replace('`\.\./http`isU', 'http', $contenuNews); 
   $imageNews = sortie($infos['news_image']);
-  //Si les liens étaient en absolu, on corrige
-  $imageNews = preg_replace('`' .'Templates/Images/news' . '`', 'images', $imageNews);
+  //Si les liens ne sont pas en asolu, on les transforme
+  if(!(strpos($imageNews,'http') !== false)) {
+	$imageNews = 'http://www.green-arrow-france.fr/'.$imageNews;
+  }
   $catNews = sortie($infos['catNews_nom']);
 
   $sectionsNews .= '<section role="region" id="news'.$numero.'" data-position="right">';
   $sectionsNews .= '<header class="fixed">';
   $sectionsNews .= '<a id="btn-news'.$numero.'-back" href="#"><span class="icon icon-back">back</span></a>';
+  $sectionsNews .= '<menu type="toolbar">';
+  $sectionsNews .= '<a href="#"><span class="icon icon-planet" id="btn-news-lecture'.$numero.'">site internet</span></a>';
+  $sectionsNews .= '</menu>';
   $sectionsNews .= '<h1>'.$titreNews.'</h1>';
   $sectionsNews .= '</header>';
   $sectionsNews .= '<article class="content scrollable header">';
@@ -145,6 +175,17 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
   document.querySelector('[data-position=\"current\"]').className = 'current';
 });";
   
+  //Pour ouvrir la news dans le navigateur
+  $javascriptNews .= "document.querySelector('#btn-news-lecture".$numero."').addEventListener ('click', function () {";
+  $javascriptNews .= "var openURL = new MozActivity({";
+  $javascriptNews .= "  name: \"view\",";
+  $javascriptNews .= "  data: {";
+  $javascriptNews .= "      type: \"url\",";
+  $javascriptNews .= "      url: \"http://www.green-arrow-france.fr/news-501-".$idNews."-".replace($titreNews).".html\"";
+  $javascriptNews .= "  }";
+  $javascriptNews .= "  });";
+  $javascriptNews .= "});";
+  
   $numero ++;
 }
 
@@ -157,18 +198,12 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, user-scalable=no" />
-  <title>Building blocks demo</title>
+  <title>Green Arrow France</title>
   <!-- Building blocks -->
-  <link rel="stylesheet" href="style/action_menu.css">
-  <link rel="stylesheet" href="style/buttons.css">
   <link rel="stylesheet" href="style/headers.css">
-  <link rel="stylesheet" href="style/status.css">
-  <link rel="stylesheet" href="style/switches.css">
   <link rel="stylesheet" href="style/drawer.css">
   <link rel="stylesheet" href="style/lists.css">
-  <link rel="stylesheet" href="style/progress_activity.css">
   <link rel="stylesheet" href="style/scrolling.css">
-  <link rel="stylesheet" href="style/toolbars.css">
   <link rel="stylesheet" href="style/BBCode.css">
   <link rel="stylesheet" href="style/styleAddon.css">
 
@@ -369,10 +404,8 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
             <aside class="pack-end">
               <img alt="photo" src="images/photo.jpg">
             </aside>
-            <a href="#">
               <p style="color: #E7E7E7;">Philippe Joulot</p>
               <p>02/06/1991 - FRANCE</p>
-            </a>
           </li>
         </ul>
         <header>Green Arrow France</header>
@@ -382,8 +415,10 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
 		  <p>Site sur la série télé Arrow</p>
 		  </li>
           <li>
+		  <a id="btn-website-a-propos" href="#">
 		  <p style="color: #E7E7E7;">URL</p>
 		  <p>www.green-arrow-france.fr</p>
+		  </a>
 		  </li>
 		</ul>
 		<header>Remerciements</header>
@@ -433,6 +468,30 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
     data: {
         type: "url",
         url: "http://www.green-arrow-france.fr"
+    }
+    });
+	
+	});
+	
+	document.querySelector('#btn-website-a-propos').addEventListener ('click', function () {
+
+	var openURL = new MozActivity({
+    name: "view",
+    data: {
+        type: "url",
+        url: "http://www.green-arrow-france.fr"
+    }
+    });
+	
+	});
+	
+	document.querySelector('.lien-navigateur').addEventListener ('click', function () {
+
+	var openURL = new MozActivity({
+    name: "view",
+    data: {
+        type: "url",
+        url: this.title
     }
     });
 	

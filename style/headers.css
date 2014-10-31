@@ -214,6 +214,10 @@ section[role="region"] > header:first-child .icon-options {
   background-image: url(headers/images/icons/options.png);
 }
 
+section[role="region"] > header:first-child .icon-planet {
+  background-image: url(headers/images/icons/earth16.png);
+}
+
 /* ----------------------------------
   Subheader
 ---------------------------------- */
