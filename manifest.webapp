@@ -3,7 +3,8 @@
   "description": "Green Arrow France est une source d'informations sur la série Arrow. Vous resterez informé sur la série où que vous soyez et à chaque instant.",
   "launch_path": "http://www.green-arrow-france.fr/FirefoxOS/firefoxos.php",
   "icons": {
-    "128": "/images/icon-128.png"
+    "128": "/images/app_128.png",
+	"60": "/images/app_60.png"
   },
   "developer": {
     "name": "Philippe Joulot",
