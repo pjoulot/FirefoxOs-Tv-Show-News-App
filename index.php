@@ -413,7 +413,7 @@ document.querySelector('#btn-news".$numero."-back').addEventListener ('click', f
           </li>
         </ul>
         <header>Green Arrow France</header>
-        <ul class="scrollable">
+        <ul>
 		  <li>
 		  <p style="color: #E7E7E7;">Informations</p>
 		  <p>Site sur la série télé Arrow</p>

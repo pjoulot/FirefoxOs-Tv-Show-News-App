@@ -1,7 +1,7 @@
 {
   "name": "Arrow France",
   "description": "Green Arrow France est une source d'informations sur la série Arrow. Vous resterez informé sur la série où que vous soyez et à chaque instant.",
-  "launch_path": "/FirefoxOS/firefoxos.php",
+  "launch_path": "/FirefoxOS/index.php",
   "icons": {
     "128": "/FirefoxOS/images/app_128.png"
   },
