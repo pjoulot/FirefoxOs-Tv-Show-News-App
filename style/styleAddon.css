@@ -29,3 +29,7 @@ section[role="region"] > header:first-child {
 	font-size: 1.6rem;
   }
 }
+
+.lectureNews img {
+	max-width: 100%;
+}
