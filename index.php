@@ -121,7 +121,7 @@ $BBcode = array(
 	return strtolower(preg_replace('#([^a-z0-9])+#i', '-', $endReplace));
 }
 
-$infos1 = query('SELECT * FROM news, categories_news WHERE catNews_id = news_cat ORDER BY news_date DESC LIMIT 0,10');
+$infos1 = query('SELECT * FROM news, categories_news WHERE catNews_id = news_cat AND news_validee = 1 ORDER BY news_date DESC LIMIT 0,10');
 $sectionsNews = "";
 $listeNews = "";
 $javascriptNews = "";
@@ -134,6 +134,7 @@ while($infos = assoc($infos1)) {
   $contenuNews = BBcode(sortie($infos['news_contenu']));
   $contenuNews = preg_replace('`\.\./http`isU', 'http', $contenuNews); 
   $imageNews = sortie($infos['news_image']);
+  $dateNews = sortie(date('d/m/Y', sortie($infos['news_date'])));
   //Si les liens ne sont pas en asolu, on les transforme
   if(!(strpos($imageNews,'http') !== false)) {
 	$imageNews = 'http://www.green-arrow-france.fr/'.$imageNews;
@@ -151,6 +152,7 @@ while($infos = assoc($infos1)) {
   $sectionsNews .= '<article class="content scrollable header">';
   $sectionsNews .= '<div class="lectureNews">';
   $sectionsNews .= '<h1>'.$titreNews.'</h1>';
+  $sectionsNews .= 'Publié le '.$dateNews.'<br/><br/>';
   $sectionsNews .= 	$contenuNews;
   $sectionsNews .= '</div>';
   $sectionsNews .= '</article>';
